@@ -1,4 +1,4 @@
-name: golangci-lint
+name: golang-linting
 on:
   pull_request:
     types:
