@@ -5,5 +5,9 @@ import (
 )
 
 func main() {
-	fmt.Println("Running App 1")
+	fmt.Println(addNumbers(1, 2))
+}
+
+func addNumbers(a, b int) int {
+	return a + b
 }
