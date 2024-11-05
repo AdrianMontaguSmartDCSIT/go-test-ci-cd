@@ -27,7 +27,7 @@ jobs:
         uses: golangci/golangci-lint-action@v6
         with:
           # Fetches the golangci-lint binary without running it
-          args: --help
+          # args: --help
           version: v1.60
 
       - name: Run app1
@@ -35,5 +35,3 @@ jobs:
 
       - name: Run app2
         run: cd app2 && golangci-lint run --fix
-
-  
