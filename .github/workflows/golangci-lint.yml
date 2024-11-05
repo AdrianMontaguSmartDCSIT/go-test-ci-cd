@@ -1,48 +1,31 @@
 name: golang-linting
-
 on:
   pull_request:
     types:
       - opened
       - synchronize
     branches:
-      - main
+      'main'
   push:
     branches:
-      - main
+      main
 
 permissions:
   contents: read
+  # Optional: allow read access to pull request. Use with `only-new-issues` option.
+  # pull-requests: read
 
 jobs:
-  discover-modules:
-    name: Discover Go Modules
-    runs-on: ubuntu-latest
-    outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
-    steps:
-      - uses: actions/checkout@v4
-      - name: Find Go Modules
-        id: set-matrix
-        run: |
-          echo "Finding Go modules..."
-          MODULES=$(find . -name 'go.mod' -exec dirname {} \;)
-          JSON=$(jq -n --arg modules "$MODULES" '{"include": ($modules | split("\n")[:-1] | map({workdir: .}))}')
-          echo "matrix=$JSON" >> $GITHUB_OUTPUT
-
   golangci:
-    name: Lint
-    needs: discover-modules
+    name: lint
     runs-on: ubuntu-latest
-    strategy:
-      matrix: ${{ fromJson(needs.discover-modules.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
           go-version: stable
-      - name: Run golangci-lint
+      - name: golangci-lint
         uses: golangci/golangci-lint-action@v6
         with:
           version: v1.60
-          working-directory: ${{ matrix.workdir }}
+          args: --config ./.github/workflows/golangci-lint.yml ./... ./app1 ./app2
