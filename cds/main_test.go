@@ -65,6 +65,7 @@ func TestRemoveFromListById(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		const dontasf string = 1
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := removeFromListById(tt.items, tt.id)
 			if (err != nil) != tt.wantErr {
