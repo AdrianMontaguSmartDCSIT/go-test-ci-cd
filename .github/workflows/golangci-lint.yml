@@ -30,5 +30,13 @@ jobs:
           args: --help
           version: v1.60
 
-      - name: Run linting with Makefile
-        run: make lint
+      # - name: Run linting with Makefile
+      #   run: make lint
+
+      - name: Run app1
+        run: cd app1 && golangci-lint run --fix
+
+      - name: Run app2
+        run: cd app2 && golangci-lint run --fix
+
+  
