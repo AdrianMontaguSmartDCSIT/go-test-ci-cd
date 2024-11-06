@@ -18,6 +18,9 @@ jobs:
   golangci:
     name: Lint
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        app-dir: [app1, app2]  # List your application directories here
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
@@ -26,12 +29,8 @@ jobs:
       - name: Download golangci-lint
         uses: golangci/golangci-lint-action@v6
         with:
-          # Fetches the golangci-lint binary without running it
-          args: --help
           version: v1.60
-
-      - name: Run app1
-        run: cd app1 && golangci-lint run --fix
-
-      - name: Run app2
-        run: cd app2 && golangci-lint run --fix
+      - name: Run golangci-lint
+        run: |
+          cd ${{ matrix.app-dir }}
+          golangci-lint run --fix
