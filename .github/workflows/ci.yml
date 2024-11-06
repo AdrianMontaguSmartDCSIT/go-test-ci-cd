@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     outputs:
-      package-dirs: ${{ steps.set-matrix.outputs.package_dirs }}
+      package_dirs: ${{ steps.set-matrix.outputs.package_dirs }}
     steps:
       # Step to dynamically set the package-dir matrix
       - name: Find Go Modules
@@ -35,11 +35,11 @@ jobs:
               matrix_entries+=("\"${dir#./}\"")
             fi
           done
-          if [ ${#matrix_entries[@]} -gt 0 ]; then
-            echo "package_dirs=[${matrix_entries[*]}]" >> $GITHUB_ENV
-          else
-            echo "package_dirs=[]" >> $GITHUB_ENV
-          fi
+          echo "{\"package_dirs\":[${matrix_entries[*]}]}" > package_dirs.json
+      # Output as JSON string
+      - name: Set output
+        run: |
+          echo "package_dirs=$(cat package_dirs.json)" >> $GITHUB_ENV
 
   run-matrix:
     runs-on: ubuntu-latest
@@ -47,7 +47,7 @@ jobs:
     if: ${{ needs.setup.outputs.package_dirs != '[]' }}
     strategy:
       matrix:
-        package-dir: ${{ fromJson(needs.setup.outputs.package_dirs) }}
+        package-dir: ${{ fromJson(needs.setup.outputs.package_dirs).package_dirs }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
