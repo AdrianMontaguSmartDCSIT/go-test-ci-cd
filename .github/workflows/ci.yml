@@ -22,11 +22,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     outputs:
-      package-dirs: ${{ steps.set-matrix.outputs.package_dirs }}
+      mymatrix: ${{ steps.setMatrix.outputs.package_dirs }}
     steps:
       # Step to dynamically set the package-dir matrix
       - name: Find Go Modules
-        id: set-matrix
+        id: setMatrix
         run: |
           dirs=$(find . -type d -mindepth 1 -maxdepth 1)  # List directories in root
           matrix_entries=()
@@ -44,12 +44,11 @@ jobs:
   run-matrix:
     runs-on: ubuntu-latest
     needs: setup
-    if: ${{ needs.setup.outputs.package-dirs != '[]' }}
+    if: ${{ needs.setup.outputs.mymatrix != '[]' }}
     strategy:
-      matrix:
-        package-dir: ${{ fromJson(needs.setup.outputs.package-dirs) }}
+      matrix: ${{ fromJson(needs.setup.outputs.mymatrix) }}
     steps:
-      - run: echo ${{matrix.package-dir}}
+      - run: echo ${{matrix.target}}
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -61,7 +60,7 @@ jobs:
 
       - name: Run tests
         run: |
-          cd ${{ matrix.package-dir }}
+          cd ${{ matrix.target }}
           gofmt -s -w .
           go vet ./...
           go mod tidy
