@@ -41,6 +41,9 @@ jobs:
             echo "package_dirs=[]" >> $GITHUB_ENV
           fi
 
+      - name: Print matrix
+        run: echo ${{ steps.setMatrix.outputs.package_dirs }}
+
   run-matrix:
     runs-on: ubuntu-latest
     needs: setup
