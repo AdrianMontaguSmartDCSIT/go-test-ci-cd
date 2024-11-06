@@ -12,12 +12,42 @@ on:
       - main
 
 jobs:
-  run-tests:
+  sast:
+    uses: SmartDCSITlimited/actions-store/.github/workflows/SAST.yml@main
+
+  secret-detection:
+    uses: SmartDCSITlimited/actions-store/.github/workflows/SecretDetection.yml@main
+
+  setup:
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    outputs:
+      package-dirs: ${{ steps.set-matrix.outputs.package_dirs }}
+    steps:
+      # Step to dynamically set the package-dir matrix
+      - name: Find Go Modules
+        id: set-matrix
+        run: |
+          dirs=$(find . -type d -mindepth 1 -maxdepth 1)  # List directories in root
+          matrix_entries=()
+          for dir in $dirs; do
+            if [[ -f "$dir/go.mod" ]]; then
+              matrix_entries+=("\"${dir#./}\"")
+            fi
+          done
+          if [ ${#matrix_entries[@]} -gt 0 ]; then
+            echo "package_dirs=[${matrix_entries[*]}]" >> $GITHUB_ENV
+          else
+            echo "package_dirs=[]" >> $GITHUB_ENV
+          fi
+
+  run-matrix:
+    runs-on: ubuntu-latest
+    needs: setup
+    if: ${{ needs.setup.outputs.package_dirs != '[]' }}
     strategy:
       matrix:
-        app-dir: [app1, app2]  # List your application directories here
+        package-dir: ${{ fromJson(needs.setup.outputs.package_dirs) }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -29,7 +59,7 @@ jobs:
 
       - name: Run tests
         run: |
-          cd ${{ matrix.app-dir }}
+          cd ${{ matrix.package-dir }}
           gofmt -s -w .
           go vet ./...
           go mod tidy
